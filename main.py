@@ -72,7 +72,7 @@ class Tree:
 
         
     def build_tree(self, element, atomic_number, mass_number, depth=0):
-        if atomic_number < 65 or mass_number <= 0 or atomic_number > 103:
+        if atomic_number < 70 or mass_number <= 0 or atomic_number > 103:
             return None
         
         new_node = TreeNode(element, atomic_number, mass_number)
