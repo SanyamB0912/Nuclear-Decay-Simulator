@@ -6,12 +6,75 @@ import time
 sys.setrecursionlimit(10000)
    
 
+class Element:
+    class Node():
+        def __init__(self, prop, value):
+            self.prop = prop
+            self.value = value
+            self.next = None
+    
+    def __init__(self, element, atomic_no, mass_no):
+        self.head = self.Node("Symbol", element )
+        self.head.next = self.Node("Atomic Number", atomic_no)
+        self.head.next.next = self.Node("Mass Number", mass_no)
+        self.head.next.next.next= self.tail = self.Node("Binding Energy", self.calculate_binding_energy(element, atomic_no, mass_no))
 
+        self.size = 4
+
+    def __getitem__(self, key):
+        if not str(key).isnumeric():
+            print("Error: Not a number")
+            return
+        
+        # Check for out-of-bounds access
+        if key >= self.size:
+            print("Error: Index out of bounds")
+            return
+
+        node = self.head
+        for _ in range(key):
+            node = node.next
+        return node.value
+        
+    def __setitem__(self, key, value):
+        if not str(key).isnumeric():
+            print("Error: Not a number")
+            return
+        
+        # Similar check for out-of-bounds access
+        if key >= self.size:
+            print("Error: Index out of bounds")
+            return
+
+        node = self.head
+        for _ in range(key):
+            node = node.next
+        node.value = value
+
+    def __str__(self) -> str:
+        return str([self.head.value, self.head.next.value, self.head.next.next.value])
+    
+    def calculate_binding_energy(self,atom, atomic_number, mass_number):
+     #calculations for child node
+        element = getattr(periodictable, atom)
+        protons = atomic_number
+        neutrons = mass_number - atomic_number
+        mass = 0
+        
+        total_mass_atom = (protons * 1.007276) + (neutrons * 1.008665)
+        for isotopes in element:
+            if str(isotopes)[:3:] == str(mass_number):
+                mass = isotopes.mass
+        mass_defect = total_mass_atom - mass
+        #bepn denotes binding energy per nucleon
+        #931.5 MeV is the energy for 1 amu
+        bepn = mass_defect * (931.5) / mass_number
+        return bepn
 
 # Basic node structure of a tree    
 class TreeNode:
     def __init__(self, element, atomic_number, mass_number):
-        self.value = [element, atomic_number, mass_number]
+        self.value = Element(element, atomic_number, mass_number)
         self.left = None           # alpha decay
         self.right = None          # beta plus
         self.middle = None
@@ -75,11 +138,12 @@ class Tree:
 
         
     def build_tree(self, element, atomic_number, mass_number, depth=0):
-        if atomic_number < 75 or mass_number <= 0 or atomic_number > 103:
+        if atomic_number < 80 or mass_number <= 0 or atomic_number > 103:
             return None
         
         new_node = TreeNode(element, atomic_number, mass_number)
-        print(new_node.value)
+        #print("Node created:",new_node.value)
+        
         depth += 1
         
         # Update maximum recursion depth
@@ -109,35 +173,32 @@ class Tree:
         
         return new_node
     
-    def print_tree(self, root, level=0, prefix="Root:"):
-        if root is None:
-            return
-    def levelorder(self,root):
+    def levelorder(self, root):
+        l = []
+        l.append(root)
         q=[]
-        l=[]
-        q.append(root)
-        q.append(None)
-        while (len(q)>0):
-            a=q.pop(0)
-            if a!=None:
-                l.append(a.value)
-                
-                
-                if a.left!=None:
-                    q.append(a.left)
-                else:
-                    l.append(-1)
-                if a.middle!=None:
-                    q.append(a.left)
-                else:
-                    l.append(-1)
-                if a.right!=None:
-                    q.append(a.right)
-                else:
-                    l.append(-1)
-                q.append(None)
-        return l
     
+        while len(l) > 0:
+            # Number of nodes at the current level
+            level_size = len(l)
+    
+            # Process nodes at the current level
+            for i in range(level_size):
+                node = l.pop(0)
+                q.append(node.value)
+            
+    
+                # Add child nodes to the queue
+                if node.left is not None:
+                    l.append(node.left)
+                if node.middle is not None:
+                    l.append(node.middle)
+                if node.right is not None:
+                    l.append(node.right)
+    
+            
+            q.append(None)
+        return q
     def get_max_recursion_depth(self):
         return self.max_depth
 
@@ -150,17 +211,10 @@ start_time = time.time()
 
 # Build the tree
 root = tree.build_tree('U', 92, 235)
-print(tree.print_tree(root))    
 
-# End the timer
-end_time = time.time()
-
-# Calculate the time taken
-time_taken = (end_time - start_time) * 1000  # Convert to milliseconds
-
-# Get the maximum recursion depth
-max_depth = tree.get_max_recursion_depth()
-
-# Display the maximum recursion depth and time taken
-#print("Maximum Recursion Depth:", max_depth)
-#print("Time taken to run the code:", time_taken, "milliseconds")
+l=(tree.levelorder(root))    
+for i in l:
+    if i is None:
+        print()
+    else:
+        print(i,end=" ")
