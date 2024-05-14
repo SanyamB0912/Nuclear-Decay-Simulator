@@ -52,7 +52,7 @@ class Element:
         node.value = value
 
     def __str__(self) -> str:
-        return str([self.head.value, self.head.next.value, self.head.next.next.value])
+        return str([self.head.value, self.head.next.value, self.head.next.next.value,self.head.next.next.next.value])
     
     def calculate_binding_energy(self,atom, atomic_number, mass_number):
      #calculations for child node
