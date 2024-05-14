@@ -5,6 +5,9 @@ import time
 # Increase recursion limit
 sys.setrecursionlimit(10000)
    
+
+
+
 # Basic node structure of a tree    
 class TreeNode:
     def __init__(self, element, atomic_number, mass_number):
@@ -72,7 +75,7 @@ class Tree:
 
         
     def build_tree(self, element, atomic_number, mass_number, depth=0):
-        if atomic_number < 70 or mass_number <= 0 or atomic_number > 103:
+        if atomic_number < 75 or mass_number <= 0 or atomic_number > 103:
             return None
         
         new_node = TreeNode(element, atomic_number, mass_number)
@@ -109,13 +112,31 @@ class Tree:
     def print_tree(self, root, level=0, prefix="Root:"):
         if root is None:
             return
-        print(" " * (level * 4) + prefix + f" {root.value}")
-        if root.left is not None:
-            self.print_tree(root.left, level + 1, "Left:")
-        if root.right is not None:
-            self.print_tree(root.right, level + 1, "Right:")
-        if root.middle is not None:
-            self.print_tree(root.middle, level + 1, "Middle:")
+    def levelorder(self,root):
+        q=[]
+        l=[]
+        q.append(root)
+        q.append(None)
+        while (len(q)>0):
+            a=q.pop(0)
+            if a!=None:
+                l.append(a.value)
+                
+                
+                if a.left!=None:
+                    q.append(a.left)
+                else:
+                    l.append(-1)
+                if a.middle!=None:
+                    q.append(a.left)
+                else:
+                    l.append(-1)
+                if a.right!=None:
+                    q.append(a.right)
+                else:
+                    l.append(-1)
+                q.append(None)
+        return l
     
     def get_max_recursion_depth(self):
         return self.max_depth
@@ -129,6 +150,7 @@ start_time = time.time()
 
 # Build the tree
 root = tree.build_tree('U', 92, 235)
+print(tree.print_tree(root))    
 
 # End the timer
 end_time = time.time()
@@ -140,5 +162,5 @@ time_taken = (end_time - start_time) * 1000  # Convert to milliseconds
 max_depth = tree.get_max_recursion_depth()
 
 # Display the maximum recursion depth and time taken
-print("Maximum Recursion Depth:", max_depth)
-print("Time taken to run the code:", time_taken, "milliseconds")
+#print("Maximum Recursion Depth:", max_depth)
+#print("Time taken to run the code:", time_taken, "milliseconds")
