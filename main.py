@@ -310,7 +310,8 @@ class Tree:
         return q
     
     '''
-    get_path(root): recursive function
+    get_path(root): Recursively explores the tree, selecting the child node with the highest increase in binding energy.
+	Maintains a list ⁠ElementList⁠ to track the elements in the optimal path.
     Worst Case Time complexicty: O(d), d - depth of the tree, at any give point it will only travers one of the 3 child nodes. 
                                            So the worst case for this code is if the the node we need to reach is at the bottom
                                            hence O(d). Every other operation is O(1). due to the use of recursion it becomes O(d)
