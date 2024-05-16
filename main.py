@@ -74,7 +74,7 @@ class ElementList:
     class Node():
         def __init__(self, element, atomic_no=0, mass_no=0, binding_energy=0):
             self.element = element
-            self.atmoic_no = atomic_no
+            self.atomic_no = atomic_no
             self.mass_no = mass_no
             self.binding_energy = binding_energy
             self.prev = None
@@ -161,7 +161,7 @@ class ElementList:
         for _ in range(self.size):
             l.append(str([node.element, node.atomic_no, node.mass_no]))
             node = node.next
-        return l
+        return str(l)
     
     def calculate_binding_energy(self, atom, atomic_number, mass_number):
         #calculations for child node
@@ -357,4 +357,4 @@ for i in l:
 
 
 tree.get_path(tree.root)
-print(tree.e.__str__())
+print(tree.e)
