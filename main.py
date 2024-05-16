@@ -14,10 +14,10 @@ class Element:
             self.next = None
     
     def __init__(self, element, atomic_no, mass_no):
-        self.head = self.Node("Symbol", element )
-        self.head.next = self.Node("Atomic Number", atomic_no)
-        self.head.next.next = self.Node("Mass Number", mass_no)
-        self.head.next.next.next= self.tail = self.Node("Binding Energy", self.calculate_binding_energy(element, atomic_no, mass_no))
+        self.symbol = self.head = self.Node("Symbol", element )
+        self.atomic_number = self.head.next = self.Node("Atomic Number", atomic_no)
+        self.mass_number =  self.head.next.next = self.Node("Mass Number", mass_no)
+        self.binding_energy = self.head.next.next.next= self.tail = self.Node("Binding Energy", self.calculate_binding_energy(element, atomic_no, mass_no))
 
         self.size = 4
 
@@ -70,7 +70,115 @@ class Element:
         #931.5 MeV is the energy for 1 amu
         bepn = mass_defect * (931.5) / mass_number
         return bepn
+class ElementList:
+    class Node():
+        def __init__(self, element, atomic_no=0, mass_no=0, binding_energy=0):
+            self.element = element
+            self.atmoic_no = atomic_no
+            self.mass_no = mass_no
+            self.binding_energy = binding_energy
+            self.prev = None
+            self.key = None
+            self.next = None
 
+    def __init__(self):
+        self.head = None 
+        self.tail = None
+        self.size = 0
+
+    def __getitem__(self, key):
+        #check if index is a number
+        if not str(key).isnumeric():
+            raise TypeError("Index must be an  integer")
+            return
+
+        # Check for out-of-bounds access
+        if key >= self.size or key<(-self.size):
+            raise ValueError("Index out of bounds")
+            return
+
+        node = self.head
+        for _ in range(key):
+            node = node.next
+        return node
+        
+    def __setitem__(self, key, value):
+        if not str(key).isnumeric():
+            print("Error: Not a number")
+            return
+
+        # Check for out-of-bounds access
+        if key >= self.size:
+            print("Error: Index out of bounds")
+            return
+
+        node = self.head
+        for _ in range(key):
+            node = node.next
+        node.element = value
+
+    def addnode(self, element, atomic_no, mass_no):
+        # Try to find element using both atomic and mass number
+        element = None
+        if atomic_no > 0:
+            try:
+                element = periodictable.elements[atomic_no]  # Access element by atomic number
+            except KeyError:
+                pass
+    
+        if element:
+            # Element found, get binding energy using the library
+            binding_energy = self.calculate_binding_energy(element.symbol, atomic_no, mass_no)  # Assuming binding energy in eV
+            if self.head == None:
+                self.head = self.tail = self.Node(element.symbol, atomic_no, mass_no, binding_energy)
+            else:
+                self.tail.next = self.Node(element.symbol, atomic_no, mass_no, binding_energy)
+                self.tail = self.tail.next
+            self.size += 1
+        else:
+            print("Error: Element not found in periodic table")
+    
+    
+    def delnode(self, element):
+        if self.head == None:
+            print("Error: List is empty")
+        else:
+            node = self.head
+            for _ in range(self.size):
+                if node.element == element:
+                    if self.head.element == element:
+                        self.head = self.head.next
+                        self.head.next.prev = None
+                    elif self.tail.element == element:
+                        self.tail = self.tail.prev
+                        self.tail.next = None
+                    else:
+                        node.prev.next = node.next
+                        node.next.prev = node.prev
+    def __str__(self) -> str:
+        l = []
+        node = self.head
+        for _ in range(self.size):
+            l.append(str([node.element, node.atomic_no, node.mass_no]))
+            node = node.next
+        return l
+    
+    def calculate_binding_energy(self, atom, atomic_number, mass_number):
+        #calculations for child node
+        element = getattr(periodictable, atom)
+        protons = atomic_number
+        neutrons = mass_number - atomic_number
+        mass = 0
+        
+        total_mass_atom = (protons * 1.007276) + (neutrons * 1.008665)
+        for isotopes in element:
+            if str(isotopes)[:3:] == str(mass_number):
+                mass = isotopes.mass
+        mass_defect = total_mass_atom - mass
+        
+        #931.5 MeV is the energy for 1 amu
+        be = mass_defect * (931.5) 
+        return be
 # Basic node structure of a tree    
 class TreeNode:
     def __init__(self, element, atomic_number, mass_number):
@@ -84,7 +192,8 @@ class Tree:
     def __init__(self):
         self.root = None
         self.max_depth = 0  # Initialize maximum recursion depth
-    
+        self.e = ElementList()
+
     def find_element(self, atomic_number, mass_number):
         element = periodictable.elements[atomic_number]
         for i in element:
@@ -199,6 +308,33 @@ class Tree:
             
             q.append(None)
         return q
+    
+    def get_path(self, root):
+        if root:
+            print(root.value)
+            dif1=dif2=dif3=0
+            if root.left is not None:
+                dif1 = root.left.value.binding_energy.value - root.value.binding_energy.value 
+            if root.middle is not None:
+                dif2 = root.middle.value.binding_energy.value - root.value.binding_energy.value
+            if root.right is not None:
+                dif3 = root.right.value.binding_energy.value - root.value.binding_energy.value 
+            # print(dif1, dif2, dif3)
+            m = max(dif1,dif2,dif3)
+            # print(m)
+            
+            if m == dif1:
+               root = root.left
+            elif m == dif2:
+                root = root.middle
+            else:
+                root = root.right
+          
+            # print(root)
+            if root is not None:
+                self.e.addnode(root.value.symbol.prop, root.value.atomic_number.value, root.value.mass_number.value)
+                self.get_path(root)
+        
     def get_max_recursion_depth(self):
         return self.max_depth
 
@@ -210,11 +346,15 @@ tree = Tree()
 start_time = time.time()
 
 # Build the tree
-root = tree.build_tree('U', 92, 235)
+tree.root = tree.build_tree('U', 92, 235)
 
-l=(tree.levelorder(root))    
+l=(tree.levelorder(tree.root))    
 for i in l:
     if i is None:
         print()
     else:
         print(i,end=" ")
+
+
+tree.get_path(tree.root)
+print(tree.e.__str__())
