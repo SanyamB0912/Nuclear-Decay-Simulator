@@ -311,7 +311,7 @@ class Tree:
     
     def get_path(self, root):
         if root:
-            print(root.value)
+            #print(root.value)
             dif1=dif2=dif3=0
             if root.left is not None:
                 dif1 = root.left.value.binding_energy.value - root.value.binding_energy.value 
@@ -342,19 +342,41 @@ class Tree:
 # Main
 tree = Tree()
 
-# Start the timer
-start_time = time.time()
-
+def check_element_exists(symbol, atomic_number, mass_number):
+    try:
+        element = getattr(periodictable, symbol)
+        if element.number==atomic_number:
+            for i in element:
+                if str(i)[:3:]==str(mass_number):
+                    return 1
+            return 0
+        else:
+            return 0
+    except AttributeError:
+        return 0
+symbol=input("Enter the symbol:")
+atomic_number=int(input("Enter the atomic number of the element:"))
+mass_number=int(input("Enter the mass number of the element:"))
+if check_element_exists(symbol, atomic_number, mass_number):
 # Build the tree
-tree.root = tree.build_tree('U', 92, 235)
+    tree.root = tree.build_tree(symbol,atomic_number,mass_number)
+    
+    
+    
+    l=(tree.levelorder(tree.root))    
+    print("The tree looks like the following:")
+    for i in l:
+        if i is None:
+            print()
+        else:
+            print(i,end=" ")
+        
+    print()
+    print()
 
-l=(tree.levelorder(tree.root))    
-for i in l:
-    if i is None:
-        print()
-    else:
-        print(i,end=" ")
-
-
-tree.get_path(tree.root)
-print(tree.e)
+    
+    tree.get_path(tree.root)
+    print(tree.e)
+    
+else:
+    print("Invalid input")
