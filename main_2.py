@@ -171,15 +171,15 @@ class ElementList:
         return be
 
 class TreeNode:
-    def __init__(self, element, atomic_number, mass_number, node_id):
+    def __init__(self, element, atomic_number, mass_number, node_id):  # node structure of the tree
         self.value = Element(element, atomic_number, mass_number)
         self.node_id = node_id
         self.left = None           # alpha decay
         self.right = None          # beta plus
-        self.middle = None
+        self.middle = None         # beta minus
 
 class Tree:
-    def __init__(self):
+    def __init__(self):      # constructor of tree class
         self.root = None
         self.max_depth = 0
         self.e = ElementList()
@@ -187,78 +187,102 @@ class Tree:
         self.optimal_path_nodes = []  # Store nodes in the optimal path
         self.optimal_path_edges = []  # Store edges in the optimal path
 
-    def find_element(self, atomic_number, mass_number):
+    def find_element(self, atomic_number, mass_number):   #finding element based on given atomic and mass number
+    #time complexity O(n)    
         element = periodictable.elements[atomic_number]
-        for i in element:
+        for i in element:                      # traversal to check through the isotopes
             if str(i)[:3] == str(mass_number):
                 return i.symbol
         return None
     
-    def alpha_decay(self, atomic_number, mass_number):
+    def alpha_decay(self, atomic_number, mass_number):   #function for alpha decay
         return atomic_number - 2, mass_number - 4
     
-    def beta_minus(self, atomic_number, mass_number):
+    def beta_minus(self, atomic_number, mass_number):   #function for beta minus decay
         return atomic_number + 1, mass_number
     
-    def beta_plus(self, atomic_number, mass_number):
+    def beta_plus(self, atomic_number, mass_number):    #function for beta plus decay
         return atomic_number - 1, mass_number
     
     def compare_calculate_mass_defect(self, atom1, atomic_number1, mass_number1, atom, atomic_number, mass_number):
-        element = getattr(periodictable, atom)
-        protons = atomic_number
-        neutrons = mass_number - atomic_number
-        mass = 0
-        total_mass_atom = (protons * 1.007276) + (neutrons * 1.008665)
-        for isotopes in element:
-            if str(isotopes)[:3] == str(mass_number):
-                mass = isotopes.mass
-        mass_defect = total_mass_atom - mass
-        bepn = mass_defect * (931.5) / mass_number
+         '''
+         Function to compare the binding energy of 2 elements. Only if the binding energy of the product 
+         element greater than the reactant element, the child is created
+         
+         Time Complexity: O(n)
+         '''
         
-        element = getattr(periodictable, atom1)
-        protons = atomic_number1
-        neutrons = mass_number1 - atomic_number1
-        mass1 = 0
-        total_mass_atom1 = (protons * 1.007276) + (neutrons * 1.008665)
-        for isotopes in element:
-            if str(isotopes)[:3] == str(mass_number1):
-                mass1 = isotopes.mass
-        mass_defect = total_mass_atom1 - mass1
-        bepn1 = mass_defect * (931.5) / mass_number1
-        
-        return bepn1 < bepn
-
-    def build_tree(self, element, atomic_number, mass_number, depth=0):
-        if atomic_number < 80 or mass_number <= 0 or atomic_number > 103:
+         #calculations for child node
+         element = getattr(periodictable, atom)    #getting the element from periodic table
+         protons = atomic_number                   #number of protons
+         neutrons = mass_number - atomic_number     #number of neutrons
+         mass = 0
+         
+         total_mass_atom = (protons * 1.007276) + (neutrons * 1.008665)    #total mass of atoms 
+         for isotopes in element:                                          #loop to extract mass of atom from periodic table
+             if str(isotopes)[:3:] == str(mass_number):
+                 mass = isotopes.mass
+         mass_defect = total_mass_atom - mass                                 #mass defect of atom (theoretical mass of atom-actual mass of atom )
+         #bepn denotes binding energy per nucleon
+         #931.5 MeV is the energy for 1 amu
+         bepn = mass_defect * (931.5) / mass_number                       #calculation for bindinf energy (e=mc**2)
+         
+         #calculations for parent node
+         element = getattr(periodictable, atom1)    #getting the element from periodic table
+         protons = atomic_number1                   #number of protons
+         neutrons = mass_number1 - atomic_number1     #number of neutrons
+         mass1 = 0
+         total_mass_atom1 = (protons * 1.007276) + (neutrons * 1.008665)   #total mass of atoms 
+         for isotopes in element:#loop to extract mass of atom from periodic table
+             if str(isotopes)[:3:] == str(mass_number1):
+                 mass1 = isotopes.mass
+         mass_defect = total_mass_atom1 - mass1       #mass defect of atom (theoretical mass of atom-actual mass of atom )
+         bepn1 = mass_defect * (931.5) / mass_number1  #calculation for bindinf energy (e=mc**2)
+         
+         
+         if bepn1 < bepn:       # if the binding energy of product is higher, return 1
+             return 1
+         else:
+             return 0
+  
+    def build_tree(self, element, atomic_number, mass_number, depth=0):   #function to build tree
+        if atomic_number < 80 or mass_number <= 0 or atomic_number > 103:   # base condition to terminate
             return None
         
         self.node_counter += 1
-        new_node = TreeNode(element, atomic_number, mass_number, self.node_counter)
+        new_node = TreeNode(element, atomic_number, mass_number, self.node_counter)   #new node for given element
         
-        depth += 1
+        depth += 1   #increment of depth
         self.max_depth = max(self.max_depth, depth)
         
-        new_a_num, new_mass_num = self.alpha_decay(atomic_number, mass_number)
-        l = self.find_element(new_a_num, new_mass_num)
-        if l is not None:
-            if self.compare_calculate_mass_defect(new_node.value[0], new_node.value[1], new_node.value[2], l, new_a_num, new_mass_num):
-                new_node.left = self.build_tree(l, new_a_num, new_mass_num, depth)
+        new_a_num, new_mass_num = self.alpha_decay(atomic_number, mass_number)    #new atom after alpha decay
+        l = self.find_element(new_a_num, new_mass_num)   #finding atom symbol after decay
+        if l is not None:  
+            if self.compare_calculate_mass_defect(new_node.value[0], new_node.value[1], new_node.value[2], l, new_a_num, new_mass_num): #compare binding energy
+                new_node.left = self.build_tree(l, new_a_num, new_mass_num, depth)   #if condition is satisfied, build left tree
         
-        new_a_num, new_mass_num = self.beta_plus(atomic_number, mass_number)
-        l = self.find_element(new_a_num, new_mass_num)
+        new_a_num, new_mass_num = self.beta_plus(atomic_number, mass_number) #new atom after beta plus decay
+        l = self.find_element(new_a_num, new_mass_num) #finding atom symbol after decay
         if l is not None:
             if self.compare_calculate_mass_defect(new_node.value[0], new_node.value[1], new_node.value[2], l, new_a_num, new_mass_num):
-                new_node.right = self.build_tree(l, new_a_num, new_mass_num, depth)
+                new_node.right = self.build_tree(l, new_a_num, new_mass_num, depth) #right child if condition satisfied
         
-        new_a_num, new_mass_num = self.beta_minus(atomic_number, mass_number)
-        l = self.find_element(new_a_num, new_mass_num)
+        new_a_num, new_mass_num = self.beta_minus(atomic_number, mass_number)  #new atom after beta minus decay
+        l = self.find_element(new_a_num, new_mass_num)  #atom symbol
         if l is not None:
             if self.compare_calculate_mass_defect(new_node.value[0], new_node.value[1], new_node.value[2], l, new_a_num, new_mass_num):
-                new_node.middle = self.build_tree(l, new_a_num, new_mass_num, depth)
+                new_node.middle = self.build_tree(l, new_a_num, new_mass_num, depth)  #building the middle tree after beta minus decay
         
         return new_node
     
     def levelorder(self, root):
+        '''
+        Level order traversal through the tree to get nodes at each level
+        The level order traversal is required to find the most optimal path to traverse through     
+        Time complexity: O(n)
+        '''
+
+        
         l = []
         l.append(root)
         q = []
@@ -278,6 +302,11 @@ class Tree:
         return q
     
     def get_path(self, root):
+        '''
+        This function is concerned about the most optimal path that the parent element (root node) can take to reach one of 
+        its leaf nodes.
+        The data of the elements through which traversal will happen is stored in a linked list
+        '''
         if root:
             self.optimal_path_nodes.append(root)  # Add node to optimal path
             dif1 = dif2 = dif3 = 0
@@ -347,6 +376,18 @@ class Tree:
 tree = Tree()
 
 def check_element_exists(symbol, atomic_number, mass_number):
+    '''
+    Function to check if the element actually exists in periodic table
+    If element symbolis correct, atomic number and mass number are also verified.
+    Isotopes are also taken in consideration
+    If all 3 user inputs are correct, the tree is built and operations are performed.
+    Otherwise an error is raised
+    
+    Time Complexity: O(n)
+    
+    
+    
+    '''
     try:
         element = getattr(periodictable, symbol)
         if element.number == atomic_number:
