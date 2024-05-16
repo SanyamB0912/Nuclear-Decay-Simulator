@@ -309,9 +309,15 @@ class Tree:
             q.append(None)
         return q
     
+    '''
+    get_path(root): recursive function
+    Worst Case Time complexicty: O(d), d - depth of the tree, at any give point it will only travers one of the 3 child nodes. 
+                                           So the worst case for this code is if the the node we need to reach is at the bottom
+                                           hence O(d). Every other operation is O(1). due to the use of recursion it becomes O(d)
+    '''
     def get_path(self, root):
         if root:
-            #print(root.value)
+            
             dif1=dif2=dif3=0
             if root.left is not None:
                 dif1 = root.left.value.binding_energy.value - root.value.binding_energy.value 
@@ -319,10 +325,9 @@ class Tree:
                 dif2 = root.middle.value.binding_energy.value - root.value.binding_energy.value
             if root.right is not None:
                 dif3 = root.right.value.binding_energy.value - root.value.binding_energy.value 
-            # print(dif1, dif2, dif3)
+           
             m = max(dif1,dif2,dif3)
-            # print(m)
-            
+           
             if m == dif1:
                root = root.left
             elif m == dif2:
