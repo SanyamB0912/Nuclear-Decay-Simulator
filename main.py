@@ -366,7 +366,7 @@ mass_number=int(input("Enter the mass number of the element:"))
 if check_element_exists(symbol, atomic_number, mass_number):
 # Build the tree
     tree.root = tree.build_tree(symbol,atomic_number,mass_number)
-    
+    tree.e.addnode(symbol,atomic_number,mass_number)
     
     
     l=(tree.levelorder(tree.root))    
