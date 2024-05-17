@@ -7,14 +7,22 @@ from fpdf import FPDF
 # Increase recursion limit
 sys.setrecursionlimit(10000)
 
+import os
+os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz-11.0.0-win64/bin'
+
+
 class Element:
-    class Node():
+    """
+    Custom defined singly linked list that is used to store each property/feature of an element in each node.
+    Node structure is as below
+    """
+    class Node():                                     #Node definition for Element class
         def __init__(self, prop, value):
             self.prop = prop
             self.value = value
             self.next = None
     
-    def __init__(self, element, atomic_no, mass_no):
+    def __init__(self, element, atomic_no, mass_no):       #initialization populates the entire list. Binding energy is calculated by pre-defined function
         self.symbol = self.head = self.Node("Symbol", element)
         self.atomic_number = self.head.next = self.Node("Atomic Number", atomic_no)
         self.mass_number = self.head.next.next = self.Node("Mass Number", mass_no)
@@ -22,24 +30,35 @@ class Element:
         self.size = 4
 
     def __getitem__(self, key):
-        if not str(key).isnumeric():
+        """
+        This is a magic method in python. We can compare it to operator overloading in the sense that this function allows us to
+        use the [] operators and helps us index the linked list.
+
+        Time complexity to get the item of an index: O(n) since the implementation traverses the list in a for loop until the node
+        of that index is reached.
+        """
+        if not str(key).isnumeric():                           #validating the index to see if it is an integer
             print("Error: Not a number")
             return
-        if key >= self.size:
+        if 0 > key or key >= self.size:                        #validating to check if the index is within bounds NOTE negative index support not added
             print("Error: Index out of bounds")
             return
 
-        node = self.head
-        for _ in range(key):
+        node = self.head                                       #traversing the list until the required node is reached
+        for _ in range(key):                                   # O(n) where n is the list size
             node = node.next
         return node.value
         
     def __setitem__(self, key, value):
+        """
+        This method also overrides [] operator and allows modifying a node/ object accessed at given index
+        Time Complexity: O(n) for similar reasons as __getitem__
+        """
         if not str(key).isnumeric():
-            print("Error: Not a number")
+            raise TypeError("Index must be an integer")
             return
-        if key >= self.size:
-            print("Error: Index out of bounds")
+        if  0 > key or key >= self.size:
+            raise ValueError("Index out of bounds")
             return
 
         node = self.head
@@ -47,10 +66,22 @@ class Element:
             node = node.next
         node.value = value
 
-    def __str__(self) -> str:
-        return str([self.head.value, self.head.next.value, self.head.next.next.value, self.head.next.next.next.value])
+    def __str__(self) -> str: 
+        """
+        Also a magic method, this returns the string format of the list whenever needed. Eg. 
+        Sodium = Element("Na", 11, 23)
+        print(Sodium)
+
+        Sample O/P
+        [Na, 11, 23, 7.87]
+        """
+        return "[" + str(self.head.value) + ", " + str(self.head.next.value) + ", " + str(self.head.next.next.value) +", " + str(self.head.next.next.next.value) + "]"
     
     def calculate_binding_energy(self, atom, atomic_number, mass_number):
+        """
+        Function to calculate the binding energy based on the mass no and atomic no
+        Time Complexity:O(no of isotopes)=can be approximated to O(1) since most elements have very few isotopes. + any overhead due to periodictable library
+        """
         element = getattr(periodictable, atom)
         protons = atomic_number
         neutrons = mass_number - atomic_number
@@ -65,7 +96,14 @@ class Element:
         return bepn
 
 class ElementList:
+    """
+    Custom defined doubly linked list that is used to store each element in each node.
+    Node structure is as below
+    """
     class Node():
+        """
+        Each feature of the element is a separate data member.
+        """
         def __init__(self, element, atomic_no=0, mass_no=0, binding_energy=0):
             self.element = element
             self.atomic_no = atomic_no
@@ -81,9 +119,16 @@ class ElementList:
         self.size = 0
 
     def __getitem__(self, key):
+        """
+        This is a magic method in python. We can compare it to operator overloading in the sense that this function allows us to
+        use the [] operators and helps us index the linked list.
+
+        Time complexity to get the item of an index: O(n) since the implementation traverses the list in a for loop until the node
+        of that index is reached.
+        """
         if not str(key).isnumeric():
             raise TypeError("Index must be an integer")
-        if key >= self.size or key < (-self.size):
+        if key >= self.size or key <0:
             raise ValueError("Index out of bounds")
 
         node = self.head
@@ -92,11 +137,15 @@ class ElementList:
         return node
         
     def __setitem__(self, key, value):
+        """
+        This method also overrides [] operator and allows modifying a node/ object accessed at given index
+        Time Complexity: O(n) for similar reasons as __getitem__
+        """
         if not str(key).isnumeric():
-            print("Error: Not a number")
+            raise TypeError("Index must be an integer")
             return
-        if key >= self.size:
-            print("Error: Index out of bounds")
+        if key >= self.size or key <0:
+            raise ValueError("Index out of bounds")
             return
 
         node = self.head
@@ -105,6 +154,10 @@ class ElementList:
         node.element = value
 
     def addnode(self, element, atomic_no, mass_no):
+        """
+        Function to add nodes to the DLL. Gets the element, atomic no, mass no as the inputs.
+        Time Complexity: O(1)
+        """
         element_obj = None
         if atomic_no > 0:
             try:
@@ -125,30 +178,10 @@ class ElementList:
         else:
             print("Error: Element not found in periodic table")
     
-    def delnode(self, element):
-        if self.head is None:
-            print("Error: List is empty")
-        else:
-            node = self.head
-            for _ in range(self.size):
-                if node.element == element:
-                    if self.head.element == element:
-                        self.head = self.head.next
-                        if self.head:
-                            self.head.prev = None
-                    elif self.tail.element == element:
-                        self.tail = self.tail.prev
-                        if self.tail:
-                            self.tail.next = None
-                    else:
-                        node.prev.next = node.next
-                        node.next.prev = node.prev
-                    self.size -= 1
-                    return
-                node = node.next
-            print("Error: Element not found in list")
 
     def __str__(self) -> str:
+        """
+        Method to provide the string representation of the ElementList class"""
         l = []
         node = self.head
         for _ in range(self.size):
@@ -157,6 +190,10 @@ class ElementList:
         return str(l)
     
     def calculate_binding_energy(self, atom, atomic_number, mass_number):
+        """
+        Function to calculate the binding energy based on the mass no and atomic no
+        Time Complexity:O(no of isotopes)=can be approximated to O(1) since most elements have very few isotopes. + any overhead due to periodictable library
+        """
         element = getattr(periodictable, atom)
         protons = atomic_number
         neutrons = mass_number - atomic_number
