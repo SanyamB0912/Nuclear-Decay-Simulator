@@ -1,0 +1,56 @@
+digraph {
+	Bi_83_215_1 [label="Bi
+Z=83
+A=215
+BE=7.56 MeV" color=red fillcolor=yellow style=filled]
+	Po_84_215_2 [label="Po
+Z=84
+A=215
+BE=7.57 MeV" color=red fillcolor=yellow style=filled]
+	Bi_83_215_1 -> Po_84_215_2 [label="β-"]
+	Pb_82_211_3 [label="Pb
+Z=82
+A=211
+BE=7.62 MeV" color=red fillcolor=yellow style=filled]
+	Po_84_215_2 -> Pb_82_211_3 [label="α"]
+	Hg_80_207_4 [label="Hg
+Z=80
+A=207
+BE=7.65 MeV" color=red fillcolor=yellow style=filled]
+	Pb_82_211_3 -> Hg_80_207_4 [label="α"]
+	Tl_81_207_5 [label="Tl
+Z=81
+A=207
+BE=7.67 MeV" color=red fillcolor=yellow style=filled]
+	Hg_80_207_4 -> Tl_81_207_5 [label="β-"]
+	Pb_82_207_6 [label="Pb
+Z=82
+A=207
+BE=7.67 MeV" color=red fillcolor=yellow style=filled]
+	Tl_81_207_5 -> Pb_82_207_6 [label="β-"]
+	Hg_80_203_7 [label="Hg
+Z=80
+A=203
+BE=7.69 MeV" color=red fillcolor=yellow style=filled]
+	Pb_82_207_6 -> Hg_80_203_7 [label="α"]
+	Bi_83_211_8 [label="Bi
+Z=83
+A=211
+BE=7.62 MeV"]
+	Pb_82_211_3 -> Bi_83_211_8 [label="β-"]
+	Tl_81_207_9 [label="Tl
+Z=81
+A=207
+BE=7.67 MeV"]
+	Bi_83_211_8 -> Tl_81_207_9 [label="α"]
+	Pb_82_207_10 [label="Pb
+Z=82
+A=207
+BE=7.67 MeV"]
+	Tl_81_207_9 -> Pb_82_207_10 [label="β-"]
+	Hg_80_203_11 [label="Hg
+Z=80
+A=203
+BE=7.69 MeV"]
+	Pb_82_207_10 -> Hg_80_203_11 [label="α"]
+}

@@ -318,8 +318,7 @@ class Tree:
         The level order traversal is required to find the most optimal path to traverse through     
         Time complexity: O(n)
         '''
-
-        
+                
         l = []
         l.append(root)
         q = []
@@ -343,6 +342,9 @@ class Tree:
         This function is concerned about the most optimal path that the parent element (root node) can take to reach one of 
         its leaf nodes.
         The data of the elements through which traversal will happen is stored in a linked list
+        Time Complexicty: O(d) - depth of the tree, at any give point it will only travers one of the 3 child nodes. 
+                                 So the worst case for this code is if the the node we need to reach is at the bottom
+                                 hence O(d). Every other operation is O(1). due to the use of recursion it becomes O(d)
         '''
         if root:
             self.optimal_path_nodes.append(root)  # Add node to optimal path
